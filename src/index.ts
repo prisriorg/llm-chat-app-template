@@ -70,8 +70,8 @@ async function handleChatRequest(
 		const stream = await env.AI.run(
 			MODEL_ID,
 			{
-				messages,
-				max_tokens: 1024,
+				instructions:SYSTEM_PROMPT,
+				input:messages,
 				stream: true,
 			},
 			{
