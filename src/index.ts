@@ -33,7 +33,7 @@ export default {
       });
 
       return Response.json({
-        reply: aiResponse.response,
+        reply: aiResponse,
       });
 
     } catch (err) {
