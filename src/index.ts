@@ -1,28 +1,43 @@
-/**
- * LLM Chat Application Template
- *
- * A simple chat application using Cloudflare Workers AI.
- * This template demonstrates how to implement an LLM-powered chat interface with
- * streaming responses using Server-Sent Events (SSE).
- *
- * @license MIT
- */
-import { Env, ChatMessage } from "./types";
+import { Env } from "./types";
 
-// Model ID for Workers AI model
-// https://developers.cloudflare.com/workers-ai/models/
 const MODEL_ID = "@cf/openai/gpt-oss-120b";
 
-// Default system prompt
 const SYSTEM_PROMPT =
-	"You are a helpful, friendly assistant. Provide concise and accurate responses.";
-export default {
-  async fetch(request, env): Promise<Response> {
-    const response = await env.AI.run('@cf/openai/gpt-oss-120b', {
-      instructions: 'You are a concise assistant.',
-      input: request.quary.id,
-    });
+  "You are a helpful, friendly assistant. Provide concise and accurate responses.";
 
-    return Response.json(response);
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+
+    // Only POST allowed
+    if (request.method !== "POST") {
+      return new Response("Method Not Allowed", { status: 405 });
+    }
+
+    try {
+      // read json body
+      const body = await request.json();
+
+      // expecting: { message: "hello" }
+      const userMessage = body?.message;
+
+      if (!userMessage) {
+        return Response.json({ error: "Message is required" }, { status: 400 });
+      }
+
+      // call Workers AI
+      const aiResponse = await env.AI.run(MODEL_ID, {
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userMessage },
+        ],
+      });
+
+      return Response.json({
+        reply: aiResponse.response,
+      });
+
+    } catch (err) {
+      return Response.json({ error: "Invalid JSON" }, { status: 400 });
+    }
   },
-} satisfies ExportedHandler<Env>;
+};
