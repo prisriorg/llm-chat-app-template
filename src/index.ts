@@ -94,7 +94,7 @@ async function handleChatRequest(
 	} catch (error) {
 		console.error("Error processing chat request:", error);
 		return new Response(
-			JSON.stringify({ error: "Failed to process request" }),
+			JSON.stringify({ error: "Failed to process request"+JSON.stringify(error) }),
 			{
 				status: 500,
 				headers: { "content-type": "application/json" },
