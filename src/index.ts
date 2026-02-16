@@ -28,10 +28,8 @@ export default {
       }
 
       const aiResponse = await env.AI.run(MODEL_ID, {
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMessage },
-        ],
+        instructions: 'You are a concise assistant.',
+      input: userMessage,
       });
 
       return Response.json({
