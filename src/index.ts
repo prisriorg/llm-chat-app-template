@@ -8,18 +8,25 @@ const SYSTEM_PROMPT =
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
 
-    try {
-      // read json body
-      const body = await request.json();
+    const url = new URL(request.url);
 
-      // expecting: { message: "hello" }
+    // only /api/chat allowed
+    if (url.pathname !== "/api/chat") {
+      return new Response("Not Found", { status: 404 });
+    }
+
+    if (request.method !== "POST") {
+      return new Response("Method Not Allowed", { status: 405 });
+    }
+
+    try {
+      const body = await request.json();
       const userMessage = body?.message;
 
       if (!userMessage) {
         return Response.json({ error: "Message is required" }, { status: 400 });
       }
 
-      // call Workers AI
       const aiResponse = await env.AI.run(MODEL_ID, {
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
